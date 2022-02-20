@@ -170,15 +170,38 @@ def passe_bande(liste_f   : np.array,
 Q13. Le filtre isole les fréquence autours de 372Hz, le signal sortant resemble donc a une cosinusoïdale de fréquence 372Hz, les hautes et basses fréquences ne sont plus visible, le signal n'est donc plus du tout carré.
 ![signal carré après passe-bande](./images/passe-bande-carre-372Hz.png)
 
+---
+# III. Étude d’un filtre expérimental
 
+Q14.
+En HF : la bobine se comporte comme un interupteur ouvert, donc $i=0$, donc $\underline u_s=0$
+En BF : le condensateur se comporte comme un interupteur ouvert, donc $i=0$, donc $\underline u_s=0$
+Le circuit est donc un filtre passe-bande.
+$$
+\underline H = \frac {\underline u_s} {\underline u_e} = \frac R {R + jL\omega + \frac 1 {jC\omega}}
+    = \frac {jRC\omega} {1 - LC \omega^2 + jRC\omega}
+    = \frac 1 {1 + j \left( \frac LR \omega - \frac 1{RC\omega}\right)}
+\newline \implies 
+\begin{equation*}
+    \begin{cases}
+        \omega_r = \frac 1{\sqrt {LC}} \implies f_r = \frac 1 {2 \pi \sqrt{LC}}\newline
+        Q = \frac 1R \sqrt{\frac LC}
+    \end{cases}
+\end{equation*}
+\newline
+\underline H = \frac 1 {1 + jQ(\xi + \frac 1\xi)} \quad avec \quad \xi = \frac \omega {\omega _r} = \frac f {f_r}
+$$
 
+Q15.
+$$
+R = 100,6 \Omega \qquad L = 0,09590H \qquad C = 0.5006 \mu F \newline
+\implies \omega_r = 4564 s^{-1} \qquad f_r = 726.3 Hz \qquad Q = 4.351
+$$
+$$
+G = \frac 1 {\sqrt{1 + Q^2 \left(\xi - \frac 1\xi \right)^2}} \newline
+\implies G_{dB} = 20log(G) = -10 log \left(1 + Q^2 \left(\xi - \frac 1\xi \right)^2\right) \newline
+\varphi = -arctan \left( Q \left( \xi - \frac 1\xi \right) \right)
+$$
 
-
-
-
-
-
-
-
-
-
+Q16.
+![Diagrame Bode : Gain](./images/Bode-gain.png) ![Diagrame Bode : Décalage](./images/Bode-decalage.png)

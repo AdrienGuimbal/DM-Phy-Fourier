@@ -3,8 +3,8 @@
 """
 Created on Thu Feb  3 14:44:14 2022
 
-@author: Adrien Licari-Guillaume
-@author 2: Adrien Guimbal
+@author 1: Adrien Licari-Guillaume (data & wording)
+@author 2: Adrien Guimbal (code & images)
 """
 
 import numpy as np
@@ -248,14 +248,45 @@ plt.plot(t_filtré, s_filtré, label="après passe-bande", color="orange")
 plt.legend(loc="lower right")
 plt.show()
 
-#%%
 del f_filtré, A_filtré, phi_filtré, t_carré, s_carré, t_filtré, s_filtré
+# %%
+
+f_r = 726.3
+Q = 4.351
+
+f, UR, E, phi = np.loadtxt("mesures_Bode.dat", skiprows=1, unpack=True)
+phi = -(π*phi)/200 # l'avance de Us sur Ue est l'opposé de lavance de Ue sur Us
+
+G = UR / E
+Gdb = 20 * np.log10(G)
+
+xi = f / f_r
+
+Gdb_théorique = -10 * np.log10(1 + ( Q*(xi - 1/xi) )**2)
+phi_théorique = - np.arctan( Q*(xi - 1/xi) )
+
+plt.title("Gain du filtre en dB")
+plt.plot(xi, Gdb, label="expérimental", color="orange")
+plt.plot(xi, Gdb_théorique, label="théorique", color="0.8")
 
 
+plt.ylabel('G (dB)')
+plt.xlabel('ω/ωᵣ')
+plt.xscale("log")
+plt.legend(loc="lower right")
+plt.show()
 
+plt.title("Décalage de phase")
+plt.plot(xi, phi, label="expérimental", color="orange")
+plt.plot(xi, phi_théorique, label="théorique", color="0.8")
 
+plt.ylabel('φ (sans unité)')
+plt.xlabel('ω/ωᵣ')
+plt.xscale("log")
+plt.legend(loc="lower right")
+plt.show()
 
-
+del f_r, Q, f, UR, E, phi, G, Gdb, xi, Gdb_théorique, phi_théorique
 
 
 
