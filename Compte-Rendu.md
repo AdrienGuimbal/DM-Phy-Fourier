@@ -87,8 +87,8 @@ def passe_bas_1(liste_f   : np.array,
 $$
 	\underline{H} = \frac 1 {1 - \left( \frac f{f_c} \right)^2 + j \sqrt 2 \frac f{f_c}}
 	              = \frac {j \sqrt 2 \frac f{f_c}}
-				          {1 + \frac j {\sqrt 2} \left( \frac f{f_c} - \frac{f_c}f \right) }
-	\newline \implies
+				          {1 + j \frac 1{\sqrt 2} \left( \frac f{f_c} - \frac{f_c}f \right) }
+	\implies
 	\begin{equation*}
 		\begin{cases}
 			G = \frac 1 {\sqrt { 1 + \left( \frac f{f_c} \right)^4 }} \newline
@@ -119,5 +119,66 @@ def passe_bas_2(liste_f   : np.array,
     return f_sortie, A_sortie, phi_sortie
 ```
 
-Q9.
-![Signal carré après passe-bas 150Hz](./images/passe-bas-carre.png)
+Q9. On remarque que:
+ - les fonction sont plus proche de ce qu'on pouvait obtenir en tracant le sinal carré avec peu d'harmoniques.
+ - le filtre d'ordre 1 "tord" plus les pointes
+ - le filtre d'ordre 1 a ses pics contrés sur la *falling edge* alors que celui d'ordre 2 les a sur la *rising edge*
+![Signal carré après passe-bas 150Hz](./images/passe-bas-carre-150Hz.png)
+
+Q10. On peut remarquer que puisque la fréquence de coupure est plus basse que la fréquence la plus basse, le signal est applatit. Le filtre d'ordre 2 écrase plus, ce qui est cohérent avec le fait que sa coupure soit plus "sévère" que celle du filtre du 1er ordre.
+![Signal carré après passe-bas 150Hz](./images/passe-bas-carre-10Hz.png)
+
+Q11. $f_c = 1·10^{-3} h^{-1} = \frac {1·10^{-3}} {3600} s^{-1} \approx 3·10^{-7} s^{-1} $
+Le filtre isole l'harmonique de fréquence 0, il agit donc commme un moyenneur.
+![Signal carré après passe-bas 150Hz](./images/passe-bas-carre-3E-7Hz.png)
+
+---
+## 2.2. Passe-bande
+
+Q12. 
+$$
+    \underline H = \frac 1 {1 + 10 j \left( \frac f{f_r} - \frac{f_r}f \right) }
+	             = \frac {j \frac 1{10} \frac f{f_r}}
+                         {1 - \left( \frac f{f_r} \right)^2 + j \frac 1{10} \frac f{f_r}}    
+	\implies
+	\begin{equation*}
+		\begin{cases}
+			G = \frac 1 {\sqrt { 1 + 100 \left( \frac f{f_r} - \frac{f_r}f \right)^2 }} \newline
+			\varphi = - arctan \left( 10 \left( \frac f{f_r} - \frac {f_r}f \right) \right)
+		\end{cases}
+	\end{equation*}
+$$
+```python
+def passe_bande(liste_f   : np.array,
+                liste_A   : np.array,
+                liste_phi : np.array,
+                f_coupure : float) -> (np.array, np.array, np.array):
+
+    z = lambda f : (f/f_coupure - f_coupure/np.float64(f)) # fonction pour alléger les calculs
+    
+    G = lambda f : 1/np.sqrt(1 + 100 * z(f)**4) # Gain
+    dec = lambda f : - np.arctan(10 * z(f)) # decalage de phase
+    G, dec = np.vectorize(G), np.vectorize(dec)
+    
+    # f_sortie = liste_f
+    A_sortie = liste_A * G(liste_f)
+    phi_sortie = liste_phi + dec(liste_f)
+    
+    return liste_f, A_sortie, phi_sortie
+```
+
+Q13. Le filtre isole les fréquence autours de 372Hz, le signal sortant resemble donc a une cosinusoïdale de fréquence 372Hz, les hautes et basses fréquences ne sont plus visible, le signal n'est donc plus du tout carré.
+![signal carré après passe-bande](./images/passe-bande-carre-372Hz.png)
+
+
+
+
+
+
+
+
+
+
+
+
+

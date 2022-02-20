@@ -110,11 +110,11 @@ def passe_bas_1(liste_f   : np.array,
     dec = lambda f : -np.arctan(f/f_coupure) # decalage de phase
     G, dec = np.vectorize(G), np.vectorize(dec)
     
-    f_sortie = liste_f
+    # f_sortie = liste_f
     A_sortie = liste_A * G(liste_f)
     phi_sortie = liste_phi + dec(liste_f)
     
-    return f_sortie, A_sortie, phi_sortie
+    return liste_f, A_sortie, phi_sortie
 
 def passe_bas_2(liste_f   : np.array,
                 liste_A   : np.array,
@@ -127,17 +127,17 @@ def passe_bas_2(liste_f   : np.array,
     """
     
     G = lambda f : 1/np.sqrt(1 + (f/f_coupure)**4) # Gain
-    dec = lambda f : π/2 - np.arctan((f/f_coupure - f_coupure/np.float64(f))/2) # decalage de phase
+    dec = lambda f : π/2 - np.arctan((f/f_coupure - f_coupure/np.float64(f))/sqrt2) # decalage de phase
     G, dec = np.vectorize(G), np.vectorize(dec)
     
-    f_sortie = liste_f
+    # f_sortie = liste_f
     A_sortie = liste_A * G(liste_f)
-    phi_sortie = liste_phi[1:] + dec(liste_f)[1:]
+    phi_sortie = liste_phi + dec(liste_f)
     
-    return f_sortie, A_sortie, phi_sortie
+    return liste_f, A_sortie, phi_sortie
 
 # %%
-#   Passe-bas sur carré
+#   Passe-bas sur carré Q9
 
 f_carré, A_carré, phi_carré = np.loadtxt("spectre_carre.dat", skiprows=1, unpack=True)
 
@@ -148,7 +148,7 @@ t0, s0 = synthèse(f_carré, A_carré, phi_carré, 4)
 t1, s1 = synthèse(f_s1, A_s1, phi_s1, 4)
 t2, s2 = synthèse(f_s2, A_s2, phi_s2, 4)
 
-plt.title("Signal carré avant/après passe-bas ordre 150Hz")
+plt.title("Signal carré avant/après passe-bas 150Hz")
 plt.plot(t0, s0, label="sans filtre", color="0.8")
 plt.plot(t1, s1, label="filtre 1")
 plt.plot(t2, s2, label="filtre 2")
@@ -156,19 +156,100 @@ plt.plot(t2, s2, label="filtre 2")
 plt.legend(loc="lower right")
 plt.show()
 
-del f_carré, A_carré, phi_carré, f_s1, A_s1, phi_s1, f_s2, A_s2, phi_s2
+del f_s1, A_s1, phi_s1, f_s2, A_s2, phi_s2
 del t0, s0, t1, s1, t2, s2
 
+# %%
+#   Passe-bas sur carré Q10
 
+try :
+    f_carré, A_carré, phi_carré    
+except NameError:
+    f_carré, A_carré, phi_carré = np.loadtxt("spectre_carre.dat", skiprows=1, unpack=True)
 
+f_s1, A_s1, phi_s1 = passe_bas_1(f_carré, A_carré, phi_carré, 10)
+f_s2, A_s2, phi_s2 = passe_bas_2(f_carré, A_carré, phi_carré, 10)
 
+t0, s0 = synthèse(f_carré, A_carré, phi_carré, 4)
+t1, s1 = synthèse(f_s1, A_s1, phi_s1, 4)
+t2, s2 = synthèse(f_s2, A_s2, phi_s2, 4)
 
+plt.title("Signal carré avant/après passe-bas 10Hz")
+plt.plot(t0, s0, label="sans filtre", color="0.8")
+plt.plot(t1, s1, label="filtre 1")
+plt.plot(t2, s2, label="filtre 2")
 
+plt.legend(loc="lower right")
+plt.show()
 
+del f_s1, A_s1, phi_s1, f_s2, A_s2, phi_s2
+del t0, s0, t1, s1, t2, s2
 
+# %%
+#   Passe-bas sur carré Q11
 
+try :
+    f_carré, A_carré, phi_carré    
+except NameError:
+    f_carré, A_carré, phi_carré = np.loadtxt("spectre_carre.dat", skiprows=1, unpack=True)
 
+f_s2, A_s2, phi_s2 = passe_bas_2(f_carré, A_carré, phi_carré, 3e-7)
 
+t0, s0 = synthèse(f_carré, A_carré, phi_carré, 4)
+t2, s2 = synthèse(f_s2, A_s2, phi_s2, 4)
+
+plt.title("Signal carré avant/après passe-bas 3·10⁻³ h⁻¹")
+plt.plot(t0, s0, label="sans filtre", color="0.8")
+plt.plot(t2, s2, label="filtre 2", color="orange")
+
+plt.legend(loc="lower right")
+plt.show()
+
+del f_s2, A_s2, phi_s2
+del t0, s0, t2, s2
+
+# %%
+#   Passe-bande
+
+def passe_bande(liste_f   : np.array,
+                liste_A   : np.array,
+                liste_phi : np.array,
+                f_coupure : float) -> (np.array, np.array, np.array):
+
+    z = lambda f : (f/f_coupure - f_coupure/np.float64(f)) # fonction pour alléger les calculs
+    
+    G = lambda f : 1/np.sqrt(1 + 100 * z(f)**4) # Gain
+    dec = lambda f : - np.arctan(10 * z(f)) # decalage de phase
+    G, dec = np.vectorize(G), np.vectorize(dec)
+    
+    # f_sortie = liste_f
+    A_sortie = liste_A * G(liste_f)
+    phi_sortie = liste_phi + dec(liste_f)
+    
+    return liste_f, A_sortie, phi_sortie
+
+# %%
+#   Passe-bande sur carré Q11
+
+try :
+    f_carré, A_carré, phi_carré    
+except NameError:
+    f_carré, A_carré, phi_carré = np.loadtxt("spectre_carre.dat", skiprows=1, unpack=True)
+
+f_filtré, A_filtré, phi_filtré = passe_bande(f_carré, A_carré, phi_carré, 372)
+
+t_carré, s_carré = synthèse(f_carré, A_carré, phi_carré, 4)
+t_filtré, s_filtré = synthèse(f_filtré, A_filtré, phi_filtré, 4)
+
+plt.title("Signal carré avant/après passe-bande ")
+plt.plot(t_carré, s_carré, label="sans filtre", color="0.8")
+plt.plot(t_filtré, s_filtré, label="après passe-bande", color="orange")
+
+plt.legend(loc="lower right")
+plt.show()
+
+#%%
+del f_filtré, A_filtré, phi_filtré, t_carré, s_carré, t_filtré, s_filtré
 
 
 
