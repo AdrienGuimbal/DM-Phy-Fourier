@@ -123,14 +123,15 @@ Q9. On remarque que:
  - les fonction sont plus proche de ce qu'on pouvait obtenir en tracant le sinal carré avec peu d'harmoniques.
  - le filtre d'ordre 1 "tord" plus les pointes
  - le filtre d'ordre 1 a ses pics contrés sur la *falling edge* alors que celui d'ordre 2 les a sur la *rising edge*
+ - _le sinal du filtre du premier ordre resemble à la réponse d'un circuit du 1er ordre à une consigne constante_
 ![Signal carré après passe-bas 150Hz](./images/passe-bas-carre-150Hz.png)
 
 Q10. On peut remarquer que puisque la fréquence de coupure est plus basse que la fréquence la plus basse, le signal est applatit. Le filtre d'ordre 2 écrase plus, ce qui est cohérent avec le fait que sa coupure soit plus "sévère" que celle du filtre du 1er ordre.
+_On remarque aussi que puique la moyenne est nulle le filtre 1 agit comme un intégrateur_
 ![Signal carré après passe-bas 150Hz](./images/passe-bas-carre-10Hz.png)
 
-Q11. $f_c = 1·10^{-3} h^{-1} = \frac {1·10^{-3}} {3600} s^{-1} \approx 3·10^{-7} s^{-1} $
-Le filtre isole l'harmonique de fréquence 0, il agit donc commme un moyenneur.
-![Signal carré après passe-bas 150Hz](./images/passe-bas-carre-3E-7Hz.png)
+Q11. Le filtre isole l'harmonique de fréquence 0, il agit donc commme un moyenneur.
+![Signal carré après passe-bas 150Hz](./images/passe-bas-temp-3E-7Hz.png)
 
 ---
 ## 2.2. Passe-bande

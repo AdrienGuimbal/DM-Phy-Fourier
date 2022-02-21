@@ -7,8 +7,11 @@ Created on Thu Feb  3 14:44:14 2022
 @author 2: Adrien Guimbal (code & images)
 """
 
+# %%
 import numpy as np
 import matplotlib.pyplot as plt
+
+from typing import Tuple
 
 π = np.pi
 τ = 2 * π
@@ -21,7 +24,7 @@ cos = np.cos
 def synthèse(liste_f   : np.array,
              liste_amp : np.array,
              liste_phi : np.array,
-             n_périodes = 5) -> (np.array, np.array):
+             n_périodes = 5) -> Tuple[np.array, np.array]:
     """
     Génère un signal à partir de la liste des fréquences et de la donnée
     du spectre.
@@ -99,7 +102,7 @@ del f_x, f_y, A_x, A_y, phi_x, phi_y, t_x, t_y, x, y
 def passe_bas_1(liste_f   : np.array,
                 liste_A   : np.array,
                 liste_phi : np.array,
-                f_coupure : float) -> (np.array, np.array, np.array):
+                f_coupure : float) -> Tuple[np.array, np.array, np.array]:
     """
     Renvoie le spectre filtré par le fonction de transfert
         H = (1 + 𝒋f/fc)⁻¹
@@ -119,16 +122,18 @@ def passe_bas_1(liste_f   : np.array,
 def passe_bas_2(liste_f   : np.array,
                 liste_A   : np.array,
                 liste_phi : np.array,
-                f_coupure : float) -> (np.array, np.array, np.array):
+                f_coupure : float) -> Tuple[np.array, np.array, np.array]:
     """
     Renvoie le spectre filtré par le fonction de transfert
         H = (1 -(f/fc)² + 𝒋√2 f/fc)⁻¹
     (passe-bas d'ordre 2')
     """
     
-    G = lambda f : 1/np.sqrt(1 + (f/f_coupure)**4) # Gain
-    dec = lambda f : π/2 - np.arctan((f/f_coupure - f_coupure/np.float64(f))/sqrt2) # decalage de phase
-    G, dec = np.vectorize(G), np.vectorize(dec)
+    G = np.vectorize(lambda f : 1/np.sqrt(1 + (f/f_coupure)**4)) # Gain
+    @np.vectorize
+    def dec(f):
+        if f == 0 : return 0
+        else : return π/2 - np.arctan((f/f_coupure - f_coupure/f)/sqrt2) # decalage de phase
     
     # f_sortie = liste_f
     A_sortie = liste_A * G(liste_f)
@@ -186,26 +191,23 @@ del f_s1, A_s1, phi_s1, f_s2, A_s2, phi_s2
 del t0, s0, t1, s1, t2, s2
 
 # %%
-#   Passe-bas sur carré Q11
+#   Passe-bas sur température
 
-try :
-    f_carré, A_carré, phi_carré    
-except NameError:
-    f_carré, A_carré, phi_carré = np.loadtxt("spectre_carre.dat", skiprows=1, unpack=True)
+f_temp, A_temp, phi_temp = np.loadtxt("spectre_temperatures.dat", skiprows=1, unpack=True)
 
-f_s2, A_s2, phi_s2 = passe_bas_2(f_carré, A_carré, phi_carré, 3e-7)
+f_s2, A_s2, phi_s2 = passe_bas_2(f_temp, A_temp, phi_temp, 3e-3)
 
-t0, s0 = synthèse(f_carré, A_carré, phi_carré, 4)
-t2, s2 = synthèse(f_s2, A_s2, phi_s2, 4)
+t0, s0 = synthèse(f_temp, A_temp, phi_temp, 1)
+t2, s2 = synthèse(f_s2, A_s2, phi_s2, 1)
 
-plt.title("Signal carré avant/après passe-bas 3·10⁻³ h⁻¹")
+plt.title("Températures avant/après passe-bas 3·10⁻³ h⁻¹")
 plt.plot(t0, s0, label="sans filtre", color="0.8")
 plt.plot(t2, s2, label="filtre 2", color="orange")
 
 plt.legend(loc="lower right")
 plt.show()
 
-del f_s2, A_s2, phi_s2
+#del f_s2, A_s2, phi_s2
 del t0, s0, t2, s2
 
 # %%
@@ -214,7 +216,7 @@ del t0, s0, t2, s2
 def passe_bande(liste_f   : np.array,
                 liste_A   : np.array,
                 liste_phi : np.array,
-                f_coupure : float) -> (np.array, np.array, np.array):
+                f_coupure : float) -> Tuple[np.array, np.array, np.array]:
 
     z = lambda f : (f/f_coupure - f_coupure/np.float64(f)) # fonction pour alléger les calculs
     
